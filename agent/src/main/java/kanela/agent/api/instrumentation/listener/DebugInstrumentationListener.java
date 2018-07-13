@@ -39,4 +39,14 @@ public class DebugInstrumentationListener extends AgentBuilder.Listener.Adapter 
     public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
         Logger.trace(() -> format("Ignored => {0} and loaded from {1}", typeDescription, classLoader));
     }
+
+    @Override
+    public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
+        Logger.error(() -> format("Failed to process {0} from {1}.", typeName, classLoader), throwable);
+    }
+
+    @Override
+    public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+        Logger.trace(() -> format("Completed => {0} and loaded from {1}", (classLoader == null) ? "Bootstrap class loader" : classLoader.getClass().getName()));
+    }
 }

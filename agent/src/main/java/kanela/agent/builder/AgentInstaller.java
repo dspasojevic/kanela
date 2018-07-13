@@ -19,6 +19,7 @@ package kanela.agent.builder;
 import kanela.agent.api.instrumentation.TypeTransformation;
 import kanela.agent.util.conf.KanelaConfiguration;
 
+import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 
@@ -47,6 +48,7 @@ public class AgentInstaller {
     }
 
     public AgentInstaller addTypeTransformation(TypeTransformation typeTransformation) {
+        Logger.info(() -> "Adding type transformation " + typeTransformation);
         agentBuilder.addTypeTransformation(typeTransformation);
         return this;
     }

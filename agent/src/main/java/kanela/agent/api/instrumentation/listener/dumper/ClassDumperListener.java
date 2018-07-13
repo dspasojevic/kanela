@@ -40,7 +40,7 @@ public class ClassDumperListener extends Listener.Adapter {
     File jarFile;
     KanelaConfiguration.DumpConfig config;
 
-    private ClassDumperListener(){
+    public ClassDumperListener(){
         this.config = KanelaConfiguration.instance().getDump();
         this.dumpDir = new File(config.getDumpDir());
         this.jarFile = new File(config.getDumpDir() + File.separator + config.getJarName() + ".jar");

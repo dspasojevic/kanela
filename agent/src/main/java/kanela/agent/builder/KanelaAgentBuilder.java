@@ -94,7 +94,7 @@ class KanelaAgentBuilder {
     private AgentBuilder withRetransformationForRuntime(AgentBuilder agentBuilder) {
         if (config.isAttachedInRuntime() || moduleDescription.isStoppable() || moduleDescription.shouldInjectInBootstrap()) {
             Logger.info(() -> "Retransformation Strategy activated for: " + moduleDescription.getName());
-            agentBuilder = agentBuilder.disableClassFormatChanges() // enable restrictions imposed by most VMs and also HotSpot.
+            agentBuilder = agentBuilder //.disableClassFormatChanges() // enable restrictions imposed by most VMs and also HotSpot.
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .withResubmission(PeriodicResubmitter.instance());
         }
@@ -122,8 +122,10 @@ class KanelaAgentBuilder {
 
     private AgentBuilder.Listener additionalListeners() {
         val listeners = new ArrayList<AgentBuilder.Listener>();
-        if (config.getDump().isDumpEnabled()) listeners.add(ClassDumperListener.instance());
-        if (config.getDebugMode()) listeners.add(DebugInstrumentationListener.instance());
+//        if (config.getDump().isDumpEnabled())
+            listeners.add(ClassDumperListener.instance());
+//        if (config.getDebugMode())
+            listeners.add(DebugInstrumentationListener.instance());
         return new AgentBuilder.Listener.Compound(listeners);
     }
 

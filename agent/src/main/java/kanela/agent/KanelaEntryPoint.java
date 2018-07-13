@@ -16,19 +16,19 @@
 
 package kanela.agent;
 
-import kanela.agent.circuitbreaker.SystemThroughputCircuitBreaker;
-import kanela.agent.reinstrument.Reinstrumenter;
+import io.vavr.control.Option;
+import kanela.agent.api.instrumentation.KanelaInstrumentation;
 import kanela.agent.util.BootstrapInjector;
 import kanela.agent.util.ExtensionLoader;
 import kanela.agent.util.banner.KanelaBanner;
 import kanela.agent.util.classloader.KanelaClassLoader;
 import kanela.agent.util.conf.KanelaConfiguration;
-import kanela.agent.util.jvm.OldGarbageCollectorListener;
+import kanela.agent.util.log.Logger;
 import lombok.Value;
-import lombok.val;
 
 import java.lang.instrument.Instrumentation;
 
+import static java.text.MessageFormat.format;
 import static kanela.agent.util.Execution.runWithTimeSpent;
 
 @Value
@@ -36,23 +36,23 @@ public class KanelaEntryPoint {
     /**
      * Kanela entry point.
      *
-     * @param arguments Agent argument list
+     * @param arguments       Agent argument list
      * @param instrumentation {@link Instrumentation}
      */
     private static void start(final String arguments, final Instrumentation instrumentation) {
+
         runWithTimeSpent(() -> {
             KanelaClassLoader.from(instrumentation).use(kanelaClassLoader -> {
-                val configuration = KanelaConfiguration.instance();
+                BootstrapInjector.injectJar(instrumentation, "bootstrap");
+                KanelaConfiguration configuration = KanelaConfiguration.instance();
                 KanelaBanner.show(configuration);
 
-                BootstrapInjector.injectJar(instrumentation, "bootstrap");
+
                 ExtensionLoader.attach(arguments, instrumentation);
 
-                val transformers = InstrumentationLoader.load(instrumentation, kanelaClassLoader, configuration);
-                Reinstrumenter.attach(instrumentation, configuration, transformers);
-                OldGarbageCollectorListener.attach(configuration.getOldGarbageCollectorConfig());
-                SystemThroughputCircuitBreaker.attach(configuration.getCircuitBreakerConfig());
+                RealTimeServer.listen(instrumentation);
             });
+
         });
     }
 
@@ -63,5 +63,17 @@ public class KanelaEntryPoint {
     public static void agentmain(final String arguments, final Instrumentation instrumentation) {
         KanelaConfiguration.instance().runtimeAttach();
         premain(arguments, instrumentation);
+    }
+
+
+
+    private static Option<KanelaInstrumentation> loadInstrumentation(String instrumentationClassName, ClassLoader classLoader) {
+        Logger.info(() -> format(" ==> Loading {0} ", instrumentationClassName));
+        try {
+            return Option.some((KanelaInstrumentation) Class.forName(instrumentationClassName, true, classLoader).newInstance());
+        } catch (Throwable cause) {
+            Logger.warn(() -> format("Error trying to load Instrumentation: {0} with error: {1}", instrumentationClassName, cause));
+            return Option.none();
+        }
     }
 }

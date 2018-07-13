@@ -14,10 +14,16 @@
  * =========================================================================================
  */
 
-rootProject.name = 'kanela'
+plugins {
+    id 'java'
+}
 
-include 'agent'
-include 'agent-instrumentations'
-include 'agent-attacher'
-//include 'agent-test'
-include 'agent-dispatcher'
+configurations {
+
+}
+
+dependencies {
+
+    provided 'io.opentracing:opentracing-api:0.31.0'
+
+}

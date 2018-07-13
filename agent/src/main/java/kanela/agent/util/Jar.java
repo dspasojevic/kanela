@@ -18,6 +18,7 @@ package kanela.agent.util;
 
 import io.vavr.control.Try;
 import kanela.agent.Kanela;
+import kanela.agent.util.log.Logger;
 import lombok.Value;
 import lombok.val;
 

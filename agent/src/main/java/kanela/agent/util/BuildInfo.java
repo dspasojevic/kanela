@@ -15,9 +15,9 @@
  */
 package kanela.agent.util;
 
-import lombok.SneakyThrows;
-import lombok.val;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class BuildInfo {
@@ -25,7 +25,7 @@ public class BuildInfo {
     private static String timestamp;
 
     static {
-        val properties = loadProperties();
+        Properties properties = loadProperties();
         version = properties.getProperty("version");
         timestamp  = properties.getProperty("timestamp");
     }
@@ -37,11 +37,20 @@ public class BuildInfo {
         return BuildInfo.timestamp;
     }
 
-    @SneakyThrows
     private static Properties loadProperties() {
-        val properties = new Properties();
-        val is = BuildInfo.class.getResourceAsStream("/build-info.properties");
-        properties.load(is);
+        Properties properties = new Properties();
+        InputStream is = BuildInfo.class.getResourceAsStream("/build-info.properties");
+        try {
+            properties.load(is);
+        } catch (IOException e) {
+            try {
+                is.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
+
+        }
         return properties;
     }
 }
